@@ -10,13 +10,8 @@ A modern React application for exploring and managing Bitbucket repositories and
 ## ✨ Features
 
 - 🏢 **Multi-Repository Support**: Browse all repositories in your Bitbucket workspace
-- 👥 **Branch Grouping**: Organize branches by author for better visibility
-- 🔍 **Smart Search**: Filter branches and authors with real-time search
-- 📊 **Branch Analytics**: View branch counts and statistics per repository
 - ⚡ **Performance Optimized**: Built-in caching and rate limiting for Bitbucket API
 - 🎨 **Modern UI**: Clean, responsive design with shadcn/ui components
-- 🔧 **Flexible Configuration**: Support for environment variables or runtime configuration
-- 📱 **Mobile Responsive**: Works seamlessly on desktop and mobile devices
 
 ## 🚀 Quick Start
 
@@ -24,7 +19,7 @@ A modern React application for exploring and managing Bitbucket repositories and
 
 - Node.js 18+ 
 - pnpm (recommended) or npm
-- Bitbucket workspace access with App Password
+- Bitbucket workspace access with Access Token
 
 ### Installation
 
