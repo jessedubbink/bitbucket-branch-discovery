@@ -1,0 +1,97 @@
+export interface Repository {
+  uuid: string;
+  name: string;
+  slug: string;
+  full_name: string;
+  description?: string;
+  is_private: boolean;
+  created_on: string;
+  updated_on: string;
+  links: {
+    self: {
+        href: string;
+    },
+    html: {
+      href: string;
+    },
+    avatar: {
+      href: string;
+    },
+    pullrequests: {
+      href: string;
+    },
+    commits: {
+      href: string;
+    },
+    forks: {
+      href: string;
+    },
+    watchers: {
+      href: string;
+    },
+    branches: {
+      href: string;
+    },
+    tags: {
+      href: string;
+    },
+    downloads: {
+      href: string;
+    },
+    source: {
+      href: string;
+    }
+  };
+}
+
+export interface Branch {
+  name: string;
+  target: {
+    hash: string;
+    date: string;
+    author: {
+      user?: {
+        display_name: string;
+        uuid: string;
+        account_id: string;
+        links: {
+          avatar: {
+            href: string;
+          };
+        }
+      };
+      raw: string;
+    };
+  };
+  links: {
+    self: {
+        href: string;
+    },
+    commits: {
+        href: string;
+    },
+    html: {
+        href: string;
+    },
+    pullrequest_create: {
+        href: string;
+    }
+  };
+}
+
+export interface User {
+  uuid: string;
+  display_name: string;
+  account_id: string;
+}
+
+export interface GroupedBranches {
+  [repositoryName: string]: {
+    [userName: string]: Branch[];
+  };
+}
+
+export interface BitbucketConfig {
+  workspace: string;
+  accessToken: string;
+}

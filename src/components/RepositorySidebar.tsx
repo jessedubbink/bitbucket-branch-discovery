@@ -1,0 +1,97 @@
+import { Repository } from '@/types/bitbucket';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { GitBranch, Lock, Unlock } from 'lucide-react';
+import { useState } from 'react';
+import { Input } from './ui/input';
+
+interface RepositorySidebarProps {
+  repositories: Repository[];
+  selectedRepo: string | null;
+  onRepoSelect: (repoName: string) => void;
+  onRepoSelectObject: (repo: Repository) => void;
+  branchCounts: { [repoName: string]: number };
+}
+
+export function RepositorySidebar({ 
+  repositories, 
+  selectedRepo, 
+  onRepoSelect,
+  onRepoSelectObject, 
+  branchCounts 
+}: RepositorySidebarProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredRepos = repositories
+    .filter(repo => repo.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <div className="w-96 border-r bg-muted/10 flex flex-col">
+      <div className="p-4 border-b flex-shrink-0">
+        <h2 className="font-semibold text-lg flex items-center gap-2">
+          <GitBranch className="w-5 h-5" />
+          Repositories
+        </h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          {repositories.length} repositories found
+        </p>
+        <Input
+          type="text"
+          placeholder="Search repositories..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="mt-3 w-full"
+        />
+      </div>
+      
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-2">
+            {filteredRepos.map((repo) => (
+              <Card
+                key={repo.uuid}
+                className={`cursor-pointer transition-colors hover:bg-accent/50 ${
+                  selectedRepo === repo.name ? 'bg-accent border-primary' : ''
+                }`}
+                onClick={() => { onRepoSelect(repo.name); onRepoSelectObject(repo); }}
+              >
+                <div className="p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        {repo.is_private ? (
+                          <Lock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        ) : (
+                          <Unlock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        )}
+                        <h3 className="font-medium text-sm truncate">{repo.name}</h3>
+                      </div>
+                      {repo.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                          {repo.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="text-xs">
+                      {branchCounts[repo.name] || 0} branches
+                    </Badge>
+                    {repo.is_private && (
+                      <Badge variant="outline" className="text-xs">
+                        Private
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
+}
