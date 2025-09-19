@@ -162,7 +162,6 @@ The application integrates with the Bitbucket REST API v2:
 ### Rate Limiting
 - Respects Bitbucket API rate limits
 - Automatic retry with exponential backoff
-- Visual indicators for rate limit status
 
 ## 🤝 Contributing
 
