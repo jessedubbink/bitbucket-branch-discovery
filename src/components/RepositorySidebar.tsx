@@ -37,6 +37,8 @@ export function RepositorySidebar({
       }
     });
 
+  const totalBranches = Object.values(branchCounts).reduce((sum, count) => sum + count, 0);
+
   return (
     <div className="w-96 border-r bg-muted/10 flex flex-col">
       <div className="p-4 border-b flex-shrink-0">
@@ -48,6 +50,9 @@ export function RepositorySidebar({
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {repositories.length} repositories found
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {totalBranches} branches found
             </p>
           </div>
           <div>
