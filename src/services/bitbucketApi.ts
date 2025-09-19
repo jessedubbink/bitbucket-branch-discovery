@@ -1,12 +1,6 @@
 import { Repository, Branch, BitbucketConfig } from '@/types/bitbucket';
 import { toast } from 'sonner';
 
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-  expiresAt: number;
-}
-
 interface RateLimitInfo {
   limit: number;
   remaining: number;
@@ -27,8 +21,6 @@ class BitbucketAPI {
   };
 
   private baseUrl = 'https://api.bitbucket.org/2.0';
-  public cache = new Map<string, CacheEntry<unknown>>();
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
   
   // Rate limiting properties
   public rateLimitInfo: RateLimitInfo = {
@@ -80,60 +72,6 @@ class BitbucketAPI {
       return 'manual';
     } else {
       return 'none';
-    }
-  }
-
-  public setConfig(config: BitbucketConfig): void {
-    this.config = { ...config };
-    this.cache.clear();
-    // Reset rate limit info for new configuration
-    this.rateLimitInfo = {
-      limit: 1000, // Default for authenticated requests
-      remaining: 1000,
-      resetTime: Date.now() + 3600000, // 1 hour from now
-      resource: 'api',
-      nearLimit: false,
-    };
-    
-    toast.success('Bitbucket configuration updated manually');
-  }
-
-  private getCacheKey(endpoint: string): string {
-    return `${this.config.workspace}:${endpoint}`;
-  }
-
-  private isValidCacheEntry<T>(entry: CacheEntry<T>): boolean {
-    return Date.now() < entry.expiresAt;
-  }
-
-  private getCachedData<T>(key: string): T | null {
-    const entry = this.cache.get(key) as CacheEntry<T> | undefined;
-    if (entry && this.isValidCacheEntry(entry)) {
-      return entry.data;
-    }
-    // Remove expired entry
-    if (entry) {
-      this.cache.delete(key);
-    }
-    return null;
-  }
-
-  private setCachedData<T>(key: string, data: T): void {
-    const now = Date.now();
-    const entry: CacheEntry<T> = {
-      data,
-      timestamp: now,
-      expiresAt: now + this.CACHE_DURATION,
-    };
-    this.cache.set(key, entry);
-  }
-
-  private clearExpiredCache(): void {
-    const now = Date.now();
-    for (const [key, entry] of this.cache.entries()) {
-      if (now >= entry.expiresAt) {
-        this.cache.delete(key);
-      }
     }
   }
 
@@ -266,13 +204,6 @@ class BitbucketAPI {
       }
     }
 
-    // Check cache first
-    const cacheKey = this.getCacheKey('repositories');
-    const cachedData = this.getCachedData<Repository[]>(cacheKey);
-    if (cachedData) {
-      return cachedData;
-    }
-
     try {
       const response = await this.makeRequestWithRetry(
         `${this.baseUrl}/repositories/${this.config.workspace}?pagelen=100`,
@@ -283,9 +214,6 @@ class BitbucketAPI {
 
       const data = await response.json();
       const repositories = data.values || [];
-      
-      // Cache the result
-      this.setCachedData(cacheKey, repositories);
       
       return repositories;
     } catch (error) {
@@ -299,13 +227,6 @@ class BitbucketAPI {
       throw new Error('Bitbucket configuration not set. Please configure workspace and access token.');
     }
 
-    // Check cache first
-    const cacheKey = this.getCacheKey(`branches:${repoName}`);
-    const cachedData = this.getCachedData<Branch[]>(cacheKey);
-    if (cachedData) {
-      return cachedData;
-    }
-
     try {
       const response = await this.makeRequestWithRetry(
         `${this.baseUrl}/repositories/${this.config.workspace}/${repoName}/refs/branches?pagelen=100`,
@@ -317,9 +238,6 @@ class BitbucketAPI {
       const data = await response.json();
       const branches = data.values || [];
       
-      // Cache the result
-      this.setCachedData(cacheKey, branches);
-      
       return branches;
     } catch (error) {
       console.error(`Error fetching branches for ${repoName}:`, error);
@@ -328,9 +246,6 @@ class BitbucketAPI {
   }
 
   async getAllBranches(repositories: Repository[]): Promise<{ [repoName: string]: Branch[] }> {
-    // Clean up expired cache entries before processing
-    this.clearExpiredCache();
-    
     const branchPromises = repositories.map(async (repo) => {
       try {
         const branches = await this.getBranches(repo.slug);
@@ -343,23 +258,6 @@ class BitbucketAPI {
 
     const results = await Promise.all(branchPromises);
     return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-  }
-
-  // Public method to clear all cached data
-  clearCache(): void {
-    this.cache.clear();
-  }
-
-  // Public method to get cache statistics
-  getCacheInfo(): { size: number; entries: Array<{ key: string; expiresAt: number }> } {
-    const entries = Array.from(this.cache.entries()).map(([key, entry]) => ({
-      key,
-      expiresAt: entry.expiresAt,
-    }));
-    return {
-      size: this.cache.size,
-      entries,
-    };
   }
 
   // Public method to get rate limit status

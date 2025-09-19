@@ -23,6 +23,7 @@ function App() {
     loading,
     error,
     retry,
+    refresh,
   } = useBitbucketData();
 
   const branchCounts = useMemo(() => {
@@ -108,7 +109,7 @@ function App() {
             <Button
               variant="outline"
               size="sm"
-              onClick={retry}
+              onClick={refresh}
               disabled={loading}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />

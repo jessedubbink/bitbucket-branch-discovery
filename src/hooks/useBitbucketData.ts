@@ -3,6 +3,12 @@ import { Repository, Branch, GroupedBranches } from '@/types/bitbucket';
 import { bitbucketApi } from '@/services/bitbucketApi';
 import { toast } from 'sonner';
 
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  expiresAt: number;
+}
+
 export function useBitbucketData() {
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [allBranches, setAllBranches] = useState<{
@@ -15,6 +21,94 @@ export function useBitbucketData() {
   const [error, setError] = useState<string | null>(null);
   const [isConfigured, setIsConfigured] = useState(false);
   const hasAutoFetched = useRef(false);
+  
+  // Cache state and constants
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+  // Cache helper functions using localStorage
+  const getCacheKey = useCallback((endpoint: string): string => {
+    const configSource = bitbucketApi.getConfigSource();
+    const workspace = configSource === 'environment' 
+      ? import.meta.env.VITE_BITBUCKET_WORKSPACE 
+      : bitbucketApi.getConfigSource() !== 'none' ? 'manual' : 'unknown';
+    return `bitbucket_cache_${workspace}_${endpoint}`;
+  }, []);
+
+  const isValidCacheEntry = useCallback(<T>(entry: CacheEntry<T>): boolean => {
+    return Date.now() < entry.expiresAt;
+  }, []);
+
+  const getCachedData = useCallback(<T>(key: string): T | null => {
+    try {
+      const cached = localStorage.getItem(key);
+      if (!cached) return null;
+      
+      const entry = JSON.parse(cached) as CacheEntry<T>;
+      if (entry && isValidCacheEntry(entry)) {
+        return entry.data;
+      }
+      
+      // Remove expired entry
+      localStorage.removeItem(key);
+      return null;
+    } catch (error) {
+      console.warn('Failed to read from cache:', error);
+      localStorage.removeItem(key);
+      return null;
+    }
+  }, [isValidCacheEntry]);
+
+  const setCachedData = useCallback(<T>(key: string, data: T): void => {
+    try {
+      const now = Date.now();
+      const entry: CacheEntry<T> = {
+        data,
+        timestamp: now,
+        expiresAt: now + CACHE_DURATION,
+      };
+      localStorage.setItem(key, JSON.stringify(entry));
+    } catch (error) {
+      console.warn('Failed to write to cache:', error);
+    }
+  }, [CACHE_DURATION]);
+
+  const clearCache = useCallback((): void => {
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('bitbucket_cache_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to clear cache:', error);
+    }
+  }, []);
+
+  const clearExpiredCache = useCallback((): void => {
+    try {
+      const keys = Object.keys(localStorage);
+      const now = Date.now();
+      
+      keys.forEach(key => {
+        if (key.startsWith('bitbucket_cache_')) {
+          try {
+            const cached = localStorage.getItem(key);
+            if (cached) {
+              const entry = JSON.parse(cached) as CacheEntry<unknown>;
+              if (now >= entry.expiresAt) {
+                localStorage.removeItem(key);
+              }
+            }
+          } catch {
+            localStorage.removeItem(key);
+          }
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to clear expired cache:', error);
+    }
+  }, []);
 
   const groupBranchesByUser = useCallback(
     (branches: { [repoName: string]: Branch[] }): GroupedBranches => {
@@ -42,15 +136,60 @@ export function useBitbucketData() {
     []
   );
 
+  // Cached API calls
+  const getRepositoriesWithCache = useCallback(async (): Promise<Repository[]> => {
+    const cacheKey = getCacheKey('repositories');
+    const cachedData = getCachedData<Repository[]>(cacheKey);
+    
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const repos = await bitbucketApi.getRepositories();
+    setCachedData(cacheKey, repos);
+    return repos;
+  }, [getCacheKey, getCachedData, setCachedData]);
+
+  const getBranchesWithCache = useCallback(async (repoName: string): Promise<Branch[]> => {
+    const cacheKey = getCacheKey(`branches:${repoName}`);
+    const cachedData = getCachedData<Branch[]>(cacheKey);
+    
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const branches = await bitbucketApi.getBranches(repoName);
+    setCachedData(cacheKey, branches);
+    return branches;
+  }, [getCacheKey, getCachedData, setCachedData]);
+
+  const getAllBranchesWithCache = useCallback(async (repositories: Repository[]): Promise<{ [repoName: string]: Branch[] }> => {
+    // Clean up expired cache entries before processing
+    clearExpiredCache();
+    
+    const branchPromises = repositories.map(async (repo) => {
+      try {
+        const branches = await getBranchesWithCache(repo.slug);
+        return { [repo.name]: branches };
+      } catch (error) {
+        console.error(`Failed to fetch branches for ${repo.name}:`, error);
+        return { [repo.name]: [] };
+      }
+    });
+
+    const results = await Promise.all(branchPromises);
+    return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  }, [getBranchesWithCache, clearExpiredCache]);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const repos = await bitbucketApi.getRepositories();
+      const repos = await getRepositoriesWithCache();
       setRepositories(repos);
 
-      const branches = await bitbucketApi.getAllBranches(repos);
+      const branches = await getAllBranchesWithCache(repos);
       setAllBranches(branches);
 
       const grouped = groupBranchesByUser(branches);
@@ -66,7 +205,7 @@ export function useBitbucketData() {
     } finally {
       setLoading(false);
     }
-  }, [groupBranchesByUser]); // `groupBranchesByUser` is a stable memoized function, so it's fine here.
+  }, [getRepositoriesWithCache, getAllBranchesWithCache, groupBranchesByUser]); // `groupBranchesByUser` is a stable memoized function, so it's fine here.
 
   useEffect(() => {
     const checkAndFetchConfig = async () => {
@@ -92,6 +231,12 @@ export function useBitbucketData() {
     fetchData();
   }, [fetchData]);
 
+  const refresh = useCallback(() => {
+    clearCache();
+    toast.success('Cache cleared - fetching fresh data');
+    fetchData();
+  }, [clearCache, fetchData]);
+
   return {
     repositories,
     allBranches,
@@ -101,5 +246,7 @@ export function useBitbucketData() {
     isConfigured,
     handleConfigSubmit,
     retry,
+    refresh,
+    clearCache,
   };
 }
