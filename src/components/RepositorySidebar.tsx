@@ -83,7 +83,7 @@ export function RepositorySidebar({
               <Card
                 key={repo.uuid}
                 className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                  selectedRepo === repo.name ? 'bg-accent border-primary' : ''
+                  selectedRepo === repo.name ? 'border-primary' : ''
                 }`}
                 onClick={() => { onRepoSelect(repo.name); onRepoSelectObject(repo); }}
               >
