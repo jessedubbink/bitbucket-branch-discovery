@@ -138,10 +138,6 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-semibold">
-                        <a href={selectedRepoObject.project.links.html.href} target="_blank" rel="noopener noreferrer">
-                          ({selectedRepoObject.project.name})
-                        </a>
-                        <span> - </span>
                         <a href={selectedRepoObject.links.html.href} target="_blank" rel="noopener noreferrer">
                           {selectedRepo}
                         </a>
@@ -161,6 +157,12 @@ function App() {
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4" />
                           <p>{Object.keys(currentRepoData).length} contributors</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          Project: 
+                          <a href={selectedRepoObject.project.links.html.href} target="_blank" rel="noopener noreferrer">
+                            {selectedRepoObject.project.name}
+                          </a>
                         </div>
                       </div>
                     </div>
