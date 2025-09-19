@@ -2,6 +2,7 @@ import { Repository } from '@/types/bitbucket';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GitBranch, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from './ui/input';
@@ -22,21 +23,45 @@ export function RepositorySidebar({
   branchCounts 
 }: RepositorySidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'branches'>('name');
 
   const filteredRepos = repositories
     .filter(repo => repo.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else {
+        const branchCountA = branchCounts[a.name] || 0;
+        const branchCountB = branchCounts[b.name] || 0;
+        return branchCountB - branchCountA; // Sort by branch count descending
+      }
+    });
 
   return (
     <div className="w-96 border-r bg-muted/10 flex flex-col">
       <div className="p-4 border-b flex-shrink-0">
-        <h2 className="font-semibold text-lg flex items-center gap-2">
-          <GitBranch className="w-5 h-5" />
-          Repositories
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          {repositories.length} repositories found
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <GitBranch className="w-5 h-5" />
+              Repositories
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {repositories.length} repositories found
+            </p>
+          </div>
+          <div>
+            <Select value={sortBy} onValueChange={(value: 'name' | 'branches') => setSortBy(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Sort by Name (A-Z)</SelectItem>
+                <SelectItem value="branches">Sort by Branch Count</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <Input
           type="text"
           placeholder="Search repositories..."
