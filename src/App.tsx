@@ -6,8 +6,7 @@ import { LoadingSkeleton, LoadingSpinner } from '@/components/LoadingState';
 import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { GitBranch, Users, RefreshCw } from 'lucide-react';
+import { GitBranch, Users, RefreshCw, Lock, Unlock } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';
 import { Repository } from './types/bitbucket';
 
@@ -139,11 +138,22 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-semibold">
-                        <a href={selectedRepoObject?.links.html.href} target="_blank" rel="noopener noreferrer">
+                        <a href={selectedRepoObject.project.links.html.href} target="_blank" rel="noopener noreferrer">
+                          ({selectedRepoObject.project.name})
+                        </a>
+                        <span> - </span>
+                        <a href={selectedRepoObject.links.html.href} target="_blank" rel="noopener noreferrer">
                           {selectedRepo}
                         </a>
                       </h2>
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          {selectedRepoObject?.is_private ? (
+                            <div className='flex items-center'><Lock className='w-4 h-4 mr-2' /> <p>Private</p></div>
+                            ) : (
+                            <div className='flex items-center'><Unlock className='w-4 h-4 mr-2' /> <p>Public</p></div>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1">
                           <GitBranch className="w-4 h-4" />
                           <span>{totalBranches} branches</span>
@@ -154,9 +164,6 @@ function App() {
                         </div>
                       </div>
                     </div>
-                    <Badge variant="secondary">
-                      {searchTerm ? `${filteredBranches} filtered` : `${totalBranches} total`}
-                    </Badge>
                   </div>
                   
                   <SearchBar

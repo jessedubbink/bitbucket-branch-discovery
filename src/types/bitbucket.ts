@@ -7,6 +7,22 @@ export interface Repository {
   is_private: boolean;
   created_on: string;
   updated_on: string;
+  project: {
+    key: string;
+    name: string;
+    type: string;
+    links: {
+      html: {
+        href: string;
+      }
+      self: {
+        href: string;
+      }
+      avatar: {
+        href: string;
+      }
+    }
+  }
   links: {
     self: {
         href: string;
