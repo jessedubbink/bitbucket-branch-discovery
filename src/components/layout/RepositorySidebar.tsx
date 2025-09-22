@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, GitBranch, Lock, Unlock, X } from 'lucide-react';
+import { Database, GitBranch, Lock, Unlock, X } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -106,7 +106,7 @@ export function RepositorySidebar({
         {isMobile && (
           <div className="flex items-center justify-between mb-2">
             <Button variant="outline" size="sm" onClick={() => {navigate('/'); if (onClose) onClose();}}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <Database className="w-4 h-4 mr-2" />
               All Repositories
             </Button>
             <Button variant="outline" size="sm" onClick={() => {navigate('/branches'); if (onClose) onClose();}}>
