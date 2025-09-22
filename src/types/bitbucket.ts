@@ -65,6 +65,9 @@ export interface Branch {
   target: {
     hash: string;
     date: string;
+    repository: {
+      name: string;
+    },
     author: {
       user?: {
         display_name: string;

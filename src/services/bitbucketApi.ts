@@ -54,7 +54,7 @@ class BitbucketAPI {
     }
     
     if (workspace && accessToken) {
-      toast.success('✅ Bitbucket environment configuration loaded successfully');
+      toast.success('Bitbucket environment configuration loaded successfully');
     }
   }
 

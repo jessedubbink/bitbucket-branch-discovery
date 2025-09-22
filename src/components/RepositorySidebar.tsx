@@ -6,24 +6,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { GitBranch, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from './ui/input';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface RepositorySidebarProps {
   repositories: Repository[];
-  selectedRepo: string | null;
-  onRepoSelect: (repoName: string) => void;
-  onRepoSelectObject: (repo: Repository) => void;
   branchCounts: { [repoName: string]: number };
 }
 
 export function RepositorySidebar({ 
   repositories, 
-  selectedRepo, 
-  onRepoSelect,
-  onRepoSelectObject, 
   branchCounts 
 }: RepositorySidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'branches'>('name');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const filteredRepos = repositories
     .filter(repo => repo.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -38,6 +35,15 @@ export function RepositorySidebar({
     });
 
   const totalBranches = Object.values(branchCounts).reduce((sum, count) => sum + count, 0);
+  
+  // Get current selected repo from URL
+  const selectedRepo = location.pathname.includes('/repository/') 
+    ? decodeURIComponent(location.pathname.split('/repository/')[1]) 
+    : null;
+
+  const handleRepoClick = (repoName: string) => {
+    navigate(`/repository/${encodeURIComponent(repoName)}`);
+  };
 
   return (
     <div className="w-96 border-r bg-muted/10 flex flex-col">
@@ -78,14 +84,14 @@ export function RepositorySidebar({
       
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-4 space-y-2">
+          <div className="p-2 space-y-2">
             {filteredRepos.map((repo) => (
               <Card
                 key={repo.uuid}
                 className={`cursor-pointer transition-colors hover:bg-accent/50 ${
                   selectedRepo === repo.name ? 'border-primary' : ''
                 }`}
-                onClick={() => { onRepoSelect(repo.name); onRepoSelectObject(repo); }}
+                onClick={() => handleRepoClick(repo.name)}
               >
                 <div className="p-3">
                   <div className="flex items-start justify-between gap-2">

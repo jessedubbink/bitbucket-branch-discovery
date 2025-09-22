@@ -33,7 +33,7 @@ export function SearchBar({ searchTerm, onSearchChange, totalBranches, filteredB
       </div>
       
       {searchTerm && (
-        <div className="absolute top-full left-0 mt-1 text-xs text-muted-foreground">
+        <div className="absolute top-full left-0 text-xs text-muted-foreground">
           Showing {filteredBranches} of {totalBranches} branches
         </div>
       )}

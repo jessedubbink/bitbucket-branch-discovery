@@ -1,23 +1,29 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Branch } from '@/types/bitbucket';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { GitBranch, Calendar, Hash } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { BranchGroup } from './BranchGroup';
 
-interface BranchGroupProps {
+interface UserBranchGroupProps {
+  userName: string;
+  avatarUrl?: string;
   branches: Branch[];
   searchTerm: string;
   showRepository?: boolean;
 }
 
-export function BranchGroup({ branches, searchTerm, showRepository = false }: BranchGroupProps) {
+export function UserBranchGroup({ userName, avatarUrl, branches, searchTerm, showRepository = false }: UserBranchGroupProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
   const filteredBranches = useMemo(() => {
     return branches
       .filter(branch => {
         const branchMatch = branch.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const repoMatch = showRepository && branch.target.repository.name 
-          ? branch.target.repository.name .toLowerCase().includes(searchTerm.toLowerCase())
+        const repoMatch = showRepository && branch.target.repository.name
+          ? branch.target.repository.name.toLowerCase().includes(searchTerm.toLowerCase())
           : false;
 
         const authorMatch = branch.target.author.user?.display_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -78,45 +84,41 @@ export function BranchGroup({ branches, searchTerm, showRepository = false }: Br
   }
 
   return (
-    <div className="space-y-3">
-      {filteredBranches.map((branch) => (
-        <div
-          key={'branchgroup-' + branch.target.repository.name + '-' + branch.name}
-          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/20 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <GitBranch className="w-4 h-4 text-muted-foreground" />
-            <div>
-              <div className="flex gap-1">
-                <a href={branch.links.html.href} target='_blank' rel='noopener noreferrer' className="font-medium text-sm">{branch.name}</a>
-                {showRepository && branch.target.repository.name && (
-                    <a href={`/repository/${encodeURIComponent(branch.target.repository.name)}`} className="text-sm text-blue-600 dark:text-blue-400">
-                      in {branch.target.repository.name}
-                    </a>
-                )}
-              </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                <div className="flex items-center gap-1">
-                  <Hash className="w-3 h-3" />
-                  <span className="font-mono">{branch.target.hash.slice(0, 7)}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  <span>
-                    {formatDistanceToNow(new Date(branch.target.date), { addSuffix: true })}
-                  </span>
+    <Card className="mb-4">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="sm" className="p-0 h-auto">
+                  {isOpen ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                </Button>
+                <div className="flex items-center gap-2">
+                  <img
+                    className="w-8 h-8 rounded-full"
+                    src={avatarUrl || 'https://www.gravatar.com/avatar/?d=mp&f=y'}
+                    alt={userName}
+                  />
+                  <span className="text-base">{userName}</span>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {branch.target.author.user?.display_name || branch.target.author.raw}
-            </Badge>
-          </div>
-        </div>
-      ))}
-    </div>
+              <Badge variant="secondary">
+                {filteredBranches.length} branch{filteredBranches.length !== 1 ? 'es' : ''}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            <BranchGroup branches={filteredBranches} searchTerm={searchTerm} showRepository />
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   );
 }

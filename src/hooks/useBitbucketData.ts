@@ -14,6 +14,7 @@ export function useBitbucketData() {
   const [allBranches, setAllBranches] = useState<{
     [repoName: string]: Branch[];
   }>({});
+  const [flatBranches, setFlatBranches] = useState<Branch[]>([]);
   const [groupedBranches, setGroupedBranches] = useState<GroupedBranches>(
     {}
   );
@@ -192,11 +193,12 @@ export function useBitbucketData() {
       const branches = await getAllBranchesWithCache(repos);
       setAllBranches(branches);
 
+      setFlatBranches(Object.values(branches).flat());
+
       const grouped = groupBranchesByUser(branches);
       setGroupedBranches(grouped);
 
       setIsConfigured(true);
-      toast.success('Data fetched successfully');
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'An unexpected error occurred';
@@ -213,7 +215,6 @@ export function useBitbucketData() {
       if (configSource !== 'none') {
         setIsConfigured(true);
         if (configSource === 'environment' && !hasAutoFetched.current) {
-          toast.success('Using environment configuration');
           hasAutoFetched.current = true;
           await fetchData(); // Await fetchData to ensure sequential execution
         }
@@ -241,6 +242,7 @@ export function useBitbucketData() {
     repositories,
     allBranches,
     groupedBranches,
+    flatBranches,
     loading,
     error,
     isConfigured,
