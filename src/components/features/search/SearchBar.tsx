@@ -1,6 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SearchBarProps {
   searchTerm: string;
@@ -10,15 +11,17 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ searchTerm, onSearchChange, totalBranches, filteredBranches }: SearchBarProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="relative">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
-          placeholder="Search branches..."
+          placeholder={isMobile ? "Search..." : "Search branches..."}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 pr-10"
+          className={`pl-10 pr-10 ${isMobile ? 'text-sm' : ''}`}
         />
         {searchTerm && (
           <Button
@@ -33,7 +36,7 @@ export function SearchBar({ searchTerm, onSearchChange, totalBranches, filteredB
       </div>
       
       {searchTerm && (
-        <div className="absolute top-full left-0 text-xs text-muted-foreground">
+        <div className={`absolute top-full left-0 text-xs text-muted-foreground ${isMobile ? 'mt-1' : ''}`}>
           Showing {filteredBranches} of {totalBranches} branches
         </div>
       )}

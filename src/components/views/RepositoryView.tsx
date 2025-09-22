@@ -7,11 +7,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, GitBranch, Users, Lock, Unlock, ExternalLink } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';
 import { UserBranchGroup } from '@/components/features/branches/UserBranchGroup';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function RepositoryView() {
   const { repoName } = useParams<{ repoName: string }>();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const isMobile = useIsMobile();
   
   const {
     repositories,
@@ -76,7 +78,7 @@ export default function RepositoryView() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Repository Header */}
-      <div className="flex-shrink-0 p-6 pb-4 border-b bg-muted/30">
+      <div className={`flex-shrink-0 ${isMobile ? 'p-4 pb-3' : 'p-6 pb-4'} border-b bg-muted/30`}>
         <div className="space-y-4">
           <div className="flex flex-col gap-4">
             <div className="flex">
@@ -86,63 +88,50 @@ export default function RepositoryView() {
                 onClick={() => navigate('/')}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Overview
+                {isMobile ? 'Back' : 'Back to Overview'}
               </Button>
             </div>
             
-            <div className="bg-card p-4 rounded-lg border shadow-sm flex-1">
-              <div className="flex gap-4 mb-2">
-                <h2 className="text-xl font-semibold">
+            <div className={`bg-card ${isMobile ? 'p-3' : 'p-4'} rounded-lg border shadow-sm flex-1`}>
+              <div className={`flex flex-row ${isMobile ? 'justify-between' : 'gap-4'}`}>
+                <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold`}>
                   {repoName}
                 </h2>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => window.open(selectedRepository.links.html.href, '_blank')}
+                  className={isMobile ? 'self-start' : ''}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  View in Bitbucket
+                  {isMobile ? 'Bitbucket' : 'View in Bitbucket'}
                 </Button>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   {selectedRepository.is_private ? (
                     <div className='flex items-center bg-red-50 dark:bg-red-950 px-2 py-1 rounded-md'>
-                      <Lock className='w-4 h-4 mr-2 text-red-600 dark:text-red-400' /> 
-                      <span className="text-red-700 dark:text-red-300">Private</span>
+                      <Lock className='w-4 h-4 text-red-600 dark:text-red-400' /> 
+                      {!isMobile ? (<span className="ml-1 text-red-700 dark:text-red-300">Private</span>) : (<></>)}
                     </div>
                   ) : (
                     <div className='flex items-center bg-green-50 dark:bg-green-950 px-2 py-1 rounded-md'>
-                      <Unlock className='w-4 h-4 mr-2 text-green-600 dark:text-green-400' /> 
-                      <span className="text-green-700 dark:text-green-300">Public</span>
+                      <Unlock className='w-4 h-4 text-green-600 dark:text-green-400' /> 
+                      {!isMobile ? (<span className="ml-1 text-green-700 dark:text-green-300">Public</span>) : (<></>)}
                     </div>
                   )}
                 </div>
                 
                 <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-950 px-2 py-1 rounded-md">
                   <GitBranch className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span className="text-blue-700 dark:text-blue-300">{totalBranches} branches</span>
+                  <span className=" flex gap-1 text-blue-700 dark:text-blue-300">{totalBranches}{!isMobile ? ( <p>branches</p>) : (<></>)}</span>
                 </div>
                 
                 <div className="flex items-center gap-1 bg-purple-50 dark:bg-purple-950 px-2 py-1 rounded-md">
                   <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <span className="text-purple-700 dark:text-purple-300">{Object.keys(currentRepoData).length} contributors</span>
+                  <span className=" flex gap-1 text-purple-700 dark:text-purple-300">{Object.keys(currentRepoData).length}{!isMobile ? ( <p>contributors</p>) : (<></>)}</span>
                 </div>
-                
-                {selectedRepository.project && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Project:</span>
-                    <a 
-                      href={selectedRepository.project.links.html.href} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="hover:text-primary transition-colors font-medium"
-                    >
-                      {selectedRepository.project.name}
-                    </a>
-                  </div>
-                )}
               </div>
               
               {selectedRepository.description && (
@@ -165,7 +154,7 @@ export default function RepositoryView() {
       {/* Branch Groups */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-6 pt-4 bg-muted/10">
+          <div className={`${isMobile ? 'p-4 pt-3' : 'p-6 pt-4'} bg-muted/10`}>
             {loading ? (
               <LoadingSkeleton />
             ) : (

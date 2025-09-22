@@ -3,6 +3,7 @@ import { Branch } from '@/types/bitbucket';
 import { Badge } from '@/components/ui/badge';
 import { GitBranch, Calendar, Hash, Database } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BranchGroupProps {
   branches: Branch[];
@@ -11,6 +12,7 @@ interface BranchGroupProps {
 }
 
 export function BranchGroup({ branches, searchTerm, showRepository = false }: BranchGroupProps) {
+  const isMobile = useIsMobile();
 
   const filteredBranches = useMemo(() => {
     return branches
@@ -78,19 +80,26 @@ export function BranchGroup({ branches, searchTerm, showRepository = false }: Br
   }
 
   return (
-    <div className="space-y-3">
+    <div className={`${isMobile ? 'space-y-2' : 'space-y-3'}`}>
       {filteredBranches.map((branch) => (
         <div
           key={'branchgroup-' + branch.target.repository.name + '-' + branch.name}
-          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/20 transition-colors"
+          className={`${isMobile ? 'flex flex-col gap-2 p-2' : 'flex items-center justify-between p-3'} border rounded-lg hover:bg-muted/20 transition-colors`}
         >
-          <div className="flex items-center gap-3">
-            <GitBranch className="w-4 h-4 text-muted-foreground" />
-            <div>
+          <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-3'}`}>
+            <GitBranch className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex-1 min-w-0">
               <div className="flex gap-1">
-                <a href={branch.links.html.href} target='_blank' rel='noopener noreferrer' className="font-medium text-sm">{branch.name}</a>
+                <a 
+                  href={branch.links.html.href} 
+                  target='_blank' 
+                  rel='noopener noreferrer' 
+                  className={`font-medium ${isMobile ? 'text-xs' : 'text-sm'} truncate block`}
+                >
+                  {branch.name}
+                </a>
               </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+              <div className={`flex items-center ${isMobile ? 'gap-2 flex-wrap' : 'gap-4'} text-xs text-muted-foreground mt-1`}>
                 <div className='flex items-center gap-1'>
                   <Database className="w-3 h-3" />
                   <a 
@@ -118,7 +127,7 @@ export function BranchGroup({ branches, searchTerm, showRepository = false }: Br
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-2 ${isMobile ? 'self-start mt-1' : ''}`}>
             <Badge variant="outline" className="text-xs">
               {branch.target.author.user?.display_name || branch.target.author.raw}
             </Badge>

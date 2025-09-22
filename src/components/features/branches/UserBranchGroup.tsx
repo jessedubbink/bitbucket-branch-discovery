@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { BranchGroup } from './BranchGroup';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UserBranchGroupProps {
   userName: string;
@@ -17,6 +18,7 @@ interface UserBranchGroupProps {
 
 export function UserBranchGroup({ userName, avatarUrl, branches, searchTerm, showRepository = false }: UserBranchGroupProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const filteredBranches = useMemo(() => {
     return branches
@@ -84,10 +86,10 @@ export function UserBranchGroup({ userName, avatarUrl, branches, searchTerm, sho
   }
 
   return (
-    <Card className="mb-4">
+    <Card className={`${isMobile ? 'mb-3' : 'mb-4'}`}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer">
+          <CardHeader className={`cursor-pointer ${isMobile ? 'py-3' : ''}`}>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="sm" className="p-0 h-auto">
@@ -99,14 +101,14 @@ export function UserBranchGroup({ userName, avatarUrl, branches, searchTerm, sho
                 </Button>
                 <div className="flex items-center gap-2">
                   <img
-                    className="w-8 h-8 rounded-full"
+                    className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} rounded-full`}
                     src={avatarUrl || 'https://www.gravatar.com/avatar/?d=mp&f=y'}
                     alt={userName}
                   />
-                  <span className="text-base">{userName}</span>
+                  <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>{userName}</span>
                 </div>
               </div>
-              <Badge variant="secondary">
+              <Badge variant="secondary" className={isMobile ? 'text-xs' : ''}>
                 {filteredBranches.length} branch{filteredBranches.length !== 1 ? 'es' : ''}
               </Badge>
             </CardTitle>
@@ -114,7 +116,7 @@ export function UserBranchGroup({ userName, avatarUrl, branches, searchTerm, sho
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="pt-0">
+          <CardContent className={`pt-0 ${isMobile ? 'px-3 pb-3' : ''}`}>
             <BranchGroup branches={filteredBranches} searchTerm={searchTerm} showRepository />
           </CardContent>
         </CollapsibleContent>

@@ -6,9 +6,11 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GitBranch, Layers } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function BranchesView() {
   const [searchTerm, setSearchTerm] = useState('');
+  const isMobile = useIsMobile();
   
   const {
     repositories,
@@ -47,12 +49,12 @@ export default function BranchesView() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header Section */}
-      <div className="flex-shrink-0 p-6 pb-4 border-b bg-muted/30">
+      <div className={`flex-shrink-0 ${isMobile ? 'p-4 pb-3' : 'p-6 pb-4'} border-b bg-muted/30`}>
         <div className="space-y-4">
-          <div className="bg-card p-4 rounded-lg border shadow-sm">
-            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-              <Layers className="w-5 h-5" />
-              All Branches Overview
+          <div className={`bg-card ${isMobile ? 'p-3' : 'p-4'} rounded-lg border shadow-sm`}>
+            <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2 flex items-center gap-2`}>
+              <Layers className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
+              {isMobile ? 'All Branches' : 'All Branches Overview'}
             </h2>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-950 px-2 py-1 rounded-md">
@@ -74,7 +76,7 @@ export default function BranchesView() {
       {/* Branch Groups */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-6 pt-4 bg-muted/10">
+          <div className={`${isMobile ? 'p-4 pt-3' : 'p-6 pt-4'} bg-muted/10`}>
             {loading ? (
               <LoadingSkeleton />
             ) : flatBranches.length === 0 ? (
@@ -96,7 +98,7 @@ export default function BranchesView() {
                 return b.target.date.localeCompare(a.target.date);
               })
               .map((branch) => (
-                <div key={'branchview-' + branch.target.repository.name + '-' + branch.name} className="mb-4">
+                <div key={'branchview-' + branch.target.repository.name + '-' + branch.name} className={`${isMobile ? 'mb-3' : 'mb-4'}`}>
                   <BranchGroup
                     branches={[branch]}
                     searchTerm={searchTerm}
