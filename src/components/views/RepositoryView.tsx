@@ -175,6 +175,7 @@ export default function RepositoryView() {
                   <UserBranchGroup
                     key={userName}
                     userName={userName}
+                    avatarUrl={branches[0]?.target.author.user?.links.avatar.href}
                     branches={branches}
                     searchTerm={searchTerm}
                     showRepository={false}
