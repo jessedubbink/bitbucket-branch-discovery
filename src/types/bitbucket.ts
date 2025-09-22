@@ -81,6 +81,11 @@ export interface Branch {
       };
       raw: string;
     };
+    links: {
+      html: {
+        href: string;
+      };
+    }
   };
   links: {
     self: {

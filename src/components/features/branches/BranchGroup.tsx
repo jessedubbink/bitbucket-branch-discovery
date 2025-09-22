@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Branch } from '@/types/bitbucket';
 import { Badge } from '@/components/ui/badge';
-import { GitBranch, Calendar, Hash } from 'lucide-react';
+import { GitBranch, Calendar, Hash, Database } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface BranchGroupProps {
@@ -89,16 +89,24 @@ export function BranchGroup({ branches, searchTerm, showRepository = false }: Br
             <div>
               <div className="flex gap-1">
                 <a href={branch.links.html.href} target='_blank' rel='noopener noreferrer' className="font-medium text-sm">{branch.name}</a>
-                {showRepository && branch.target.repository.name && (
-                    <a href={`/repository/${encodeURIComponent(branch.target.repository.name)}`} className="text-sm text-blue-600 dark:text-blue-400">
-                      in {branch.target.repository.name}
-                    </a>
-                )}
               </div>
               <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                <div className='flex items-center gap-1'>
+                  <Database className="w-3 h-3" />
+                  <a 
+                    href={`/repository/${encodeURIComponent(branch.target.repository.name)}`} 
+                    className="text-sm text-blue-600 dark:text-blue-400"
+                  >
+                    {branch.target.repository.name}
+                  </a>
+                </div>
                 <div className="flex items-center gap-1">
                   <Hash className="w-3 h-3" />
-                  <span className="font-mono">{branch.target.hash.slice(0, 7)}</span>
+                  <span className="font-mono">
+                    <a href={`${branch.target.links.html.href}`} target='_blank' rel='noopener noreferrer'>
+                      {branch.target.hash.slice(0, 7)}
+                    </a>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
