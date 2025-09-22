@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
-import { BranchGroup } from '@/components/BranchGroup';
 import { SearchBar } from '@/components/SearchBar';
 import { LoadingSkeleton } from '@/components/LoadingState';
 import { Button } from '@/components/ui/button';
