@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, GitBranch, Users, Lock, Unlock, ExternalLink } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';
+import { UserBranchGroup } from '../UserBranchGroup';
 
 export default function RepositoryView() {
   const { repoName } = useParams<{ repoName: string }>();
@@ -172,8 +173,9 @@ export default function RepositoryView() {
               Object.entries(currentRepoData)
                 .sort(([, aBranches], [, bBranches]) => bBranches.length - aBranches.length)
                 .map(([userName, branches]) => (
-                  <BranchGroup
+                  <UserBranchGroup
                     key={userName}
+                    userName={userName}
                     branches={branches}
                     searchTerm={searchTerm}
                     showRepository={false}
