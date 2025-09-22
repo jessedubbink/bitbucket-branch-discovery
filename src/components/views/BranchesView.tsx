@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { BranchGroup } from '@/components/BranchGroup';
-import { SearchBar } from '@/components/SearchBar';
-import { LoadingSkeleton, LoadingSpinner } from '@/components/LoadingState';
-import { ErrorState } from '@/components/ErrorState';
+import { BranchGroup } from '@/components/features/branches/BranchGroup';
+import { SearchBar } from '@/components/features/search/SearchBar';
+import { LoadingSkeleton, LoadingSpinner } from '@/components/common/LoadingState';
+import { ErrorState } from '@/components/common/ErrorState';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GitBranch, Layers } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';

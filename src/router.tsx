@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
-import { Layout } from './components/Layout';
-import NotFound from './components/NotFound';
+import { Layout } from './components/layout/Layout';
+import NotFound from './components/common/NotFound';
 import RepositoryView from './components/views/RepositoryView';
 import BranchesView from './components/views/BranchesView';
 

@@ -1,7 +1,6 @@
 import { GitBranch, RefreshCw } from "lucide-react";
-import { Button } from "./ui/button";
-import { useTheme } from "./ThemeProvider";
-import ThemeSwitch from "./ThemeSwitch";
+import { ThemeSwitch, useTheme } from "../common";
+import { Button } from "../ui/button";
 
 interface NavBarProps {
   loading: boolean;
@@ -18,7 +17,7 @@ export default function NavBar({ loading, refresh }: NavBarProps) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="GitHub Repository"
-      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+      className="text-sm text-muted-foreground transition-colors"
       style={{ display: "inline-flex", alignItems: "center" }}
     >
       By Jesse Dubbink

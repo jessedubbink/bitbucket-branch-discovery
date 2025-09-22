@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
-import { SearchBar } from '@/components/SearchBar';
-import { LoadingSkeleton } from '@/components/LoadingState';
+import { SearchBar } from '@/components/features/search/SearchBar';
+import { LoadingSkeleton } from '@/components/common/LoadingState';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, GitBranch, Users, Lock, Unlock, ExternalLink } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';
-import { UserBranchGroup } from '../UserBranchGroup';
+import { UserBranchGroup } from '@/components/features/branches/UserBranchGroup';
 
 export default function RepositoryView() {
   const { repoName } = useParams<{ repoName: string }>();
@@ -91,7 +91,7 @@ export default function RepositoryView() {
             </div>
             
             <div className="bg-card p-4 rounded-lg border shadow-sm flex-1">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex gap-4 mb-2">
                 <h2 className="text-xl font-semibold">
                   {repoName}
                 </h2>

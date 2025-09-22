@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GitBranch, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
-import { Input } from './ui/input';
+import { Input } from '@/components/ui/input';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface RepositorySidebarProps {

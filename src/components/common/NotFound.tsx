@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ArrowLeft, Home, GitBranch, Search } from 'lucide-react';
 
 export default function NotFound() {

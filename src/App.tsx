@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
-import { SearchBar } from '@/components/SearchBar';
-import { LoadingSkeleton, LoadingSpinner } from '@/components/LoadingState';
-import { ErrorState } from '@/components/ErrorState';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { GitBranch, Users } from 'lucide-react';
 import { useBitbucketData } from '@/hooks/useBitbucketData';
 import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
-import { UserBranchGroup } from './components/UserBranchGroup';
+import { ErrorState } from './components/common/ErrorState';
+import { LoadingSpinner, LoadingSkeleton } from './components/common/LoadingState';
+import { SearchBar } from './components/features/search/SearchBar';
+import { UserBranchGroup } from './components/features/branches/UserBranchGroup';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
