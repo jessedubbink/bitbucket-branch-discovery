@@ -238,6 +238,24 @@ export function useBitbucketData() {
     fetchData();
   }, [clearCache, fetchData]);
 
+  const isVersionBranch = (name: string) =>
+    // A version branch typically follows patterns like 'v1.0', 'versions/1.0', 'versions/1.0.0', 'release/1.0', 'release/1.0.0', 'versions/ASFT/v1.0', 'versions/ASFT/v1.0.0', 'versions/v1.9.1', etc.
+    /^(v\d+(\.\d+)*|versions(\/[\w-]+)*\/v?\d+(\.\d+)*|release\/\d+(\.\d+)*)(-[\w\d]+)?$/.test(name);
+
+  const isBranchStale = useCallback(async (branch: Branch): Promise<boolean> => {
+    try {
+      if (isVersionBranch(branch.name)) return false;
+      if (branch.name === 'master') return false;
+      if (branch.name === 'main') return false;
+      if (branch.name.startsWith('develop')) return false;
+
+      return await bitbucketApi.isBranchStale(branch, 30);
+    } catch (error) {
+      console.error('Failed to determine if branch is stale:', error);
+      return false; // Assume not stale on error
+    }
+  }, []);
+
   return {
     repositories,
     allBranches,
@@ -250,5 +268,7 @@ export function useBitbucketData() {
     retry,
     refresh,
     clearCache,
+    isBranchStale,
+    isVersionBranch,
   };
 }

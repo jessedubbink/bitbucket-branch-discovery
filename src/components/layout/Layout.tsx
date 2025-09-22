@@ -51,7 +51,7 @@ export function Layout() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <Outlet />
         </div>
       </div>

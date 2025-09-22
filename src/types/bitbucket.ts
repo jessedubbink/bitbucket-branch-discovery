@@ -23,6 +23,10 @@ export interface Repository {
       }
     }
   }
+  mainbranch: {
+    name: string;
+    type: string;
+  },
   links: {
     self: {
         href: string;
@@ -63,11 +67,24 @@ export interface Repository {
 export interface Branch {
   name: string;
   target: {
+    type: string;
     hash: string;
     date: string;
     repository: {
       name: string;
     },
+    parents: Array<{
+      hash: string;
+      links: {
+        self: {
+          href: string;
+        };
+        html: {
+          href: string;
+        };
+      };
+      type: string;
+    }>,
     author: {
       user?: {
         display_name: string;

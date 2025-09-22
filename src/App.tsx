@@ -118,20 +118,21 @@ function App() {
       {/* Branch Groups */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
+          {/* The content inside ScrollArea */}
           <div className="p-6 pt-4 bg-muted/10">
             {loading ? (
               <LoadingSkeleton />
             ) : Object.keys(allRepoData).length === 0 ? (
               <div className="flex items-center justify-center flex-1 py-12">
-              <div className="text-center p-8 bg-card rounded-lg border shadow-sm">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <GitBranch className="w-8 h-8 text-muted-foreground" />
+                <div className="text-center p-8 bg-card rounded-lg border shadow-sm">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <GitBranch className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No Branches Found</h3>
+                  <p className="text-muted-foreground">
+                  Select a repository from the sidebar to view its branches
+                  </p>
                 </div>
-                <h3 className="text-lg font-medium mb-2">No Branches Found</h3>
-                <p className="text-muted-foreground">
-                Select a repository from the sidebar to view its branches
-                </p>
-              </div>
               </div>
             ) : (
               Object.entries(allRepoData)
@@ -139,7 +140,6 @@ function App() {
                 if (sortBy === 'amount') {
                 return bBranches.length - aBranches.length;
                 } else {
-                // sort by latest branch date in each group
                 const aLatest = Math.max(...aBranches.map(b => new Date(b.target.date).getTime()));
                 const bLatest = Math.max(...bBranches.map(b => new Date(b.target.date).getTime()));
                 return bLatest - aLatest;

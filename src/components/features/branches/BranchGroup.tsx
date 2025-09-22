@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Branch } from '@/types/bitbucket';
 import { Badge } from '@/components/ui/badge';
 import { GitBranch, Calendar, Hash, Database } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useBitbucketData } from '@/hooks/useBitbucketData';
 
 interface BranchGroupProps {
   branches: Branch[];
@@ -13,6 +14,29 @@ interface BranchGroupProps {
 
 export function BranchGroup({ branches, searchTerm, showRepository = false }: BranchGroupProps) {
   const isMobile = useIsMobile();
+  const [staleBranches, setStaleBranches] = useState<Record<string, boolean>>({});
+  const { isBranchStale, isVersionBranch } = useBitbucketData();
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkStale = async () => {
+      const results: Record<string, boolean> = {};
+      await Promise.all(
+        branches.map(async (branch) => {
+          try {
+            results[branch.name] = await isBranchStale(branch);
+          } catch {
+            results[branch.name] = false;
+          }
+        })
+      );
+      if (isMounted) setStaleBranches(results);
+    };
+    checkStale();
+    return () => {
+      isMounted = false;
+    };
+  }, [branches, isBranchStale]);
 
   const filteredBranches = useMemo(() => {
     return branches
@@ -26,12 +50,10 @@ export function BranchGroup({ branches, searchTerm, showRepository = false }: Br
         return branchMatch || repoMatch || authorMatch;
       })
       .sort((a, b) => {
-      const isVersion = (name: string) =>
-        // A version branch typically follows patterns like 'v1.0', 'versions/1.0', 'versions/1.0.0' 'release/1.0', 'release/1.0.0', and we also have a versions/ASFT/v1.0 and versions/ASFT/v1.0.0 etc.
-        /^(v|versions\/|release\/)?\d+(\.\d+)*(-[\w\d]+)?$/.test(name);
+      
 
       const order = (name: string) => {
-        if (isVersion(name)) return 2; // version/release branches last
+        if (isVersionBranch(name)) return 2; // version/release branches last
         if (name === 'master') return 0;
         if (name.startsWith('develop')) return 1;
         return 1;
@@ -117,7 +139,7 @@ export function BranchGroup({ branches, searchTerm, showRepository = false }: Br
                     </a>
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className={`flex items-center gap-1 ${staleBranches[branch.name] === true ? 'text-red-600 dark:text-red-400' : ''}`}>
                   <Calendar className="w-3 h-3" />
                   <span>
                     {formatDistanceToNow(new Date(branch.target.date), { addSuffix: true })}

@@ -274,6 +274,17 @@ class BitbucketAPI {
   getTimeUntilReset(): number {
     return Math.max(0, this.rateLimitInfo.resetTime - Date.now());
   }
+
+  public isBranchStale(branch: Branch, daysThreshold: number = 30): boolean {
+    const now = new Date();
+    const lastCommitDateStr = branch.target?.date || branch.target?.date;
+    if (!lastCommitDateStr) return false;
+
+    const lastCommitDate = new Date(lastCommitDateStr);
+    const diffInDays = Math.floor((now.getTime() - lastCommitDate.getTime()) / (1000 * 60 * 60 * 24));
+    return diffInDays > daysThreshold;
+  }
+
 }
 
 export const bitbucketApi = new BitbucketAPI();
