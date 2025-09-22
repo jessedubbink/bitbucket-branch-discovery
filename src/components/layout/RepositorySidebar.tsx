@@ -3,19 +3,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GitBranch, Lock, Unlock } from 'lucide-react';
+import { ArrowLeft, GitBranch, Lock, Unlock, X } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ThemeSwitch } from '../common';
 
 interface RepositorySidebarProps {
   repositories: Repository[];
   branchCounts: { [repoName: string]: number };
+  onClose?: () => void;
+  isMobile?: boolean;
 }
 
 export function RepositorySidebar({ 
   repositories, 
-  branchCounts 
+  branchCounts,
+  onClose,
+  isMobile = false
 }: RepositorySidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'branches'>('name');
@@ -43,48 +49,84 @@ export function RepositorySidebar({
 
   const handleRepoClick = (repoName: string) => {
     navigate(`/repository/${encodeURIComponent(repoName)}`);
+    // Close sidebar on mobile after selection
+    if (isMobile && onClose) {
+      onClose();
+    }
   };
 
   return (
-    <div className="w-96 border-r bg-muted/10 flex flex-col">
-      <div className="p-4 border-b flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-semibold text-lg flex items-center gap-2">
-              <GitBranch className="w-5 h-5" />
-              Repositories
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {repositories.length} repositories found
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {totalBranches} branches found
-            </p>
+    <div className="w-full h-full border-r bg-muted/90 flex flex-col">
+      {/* Mobile header with close button */}
+      {isMobile && (
+        <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur">
+          <h2 className="font-semibold text-lg">Repositories</h2>
+          <div className="flex items-center gap-2">
+            <ThemeSwitch />
           </div>
-          <div>
-            <Select value={sortBy} onValueChange={(value: 'name' | 'branches') => setSortBy(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Sort by Name (A-Z)</SelectItem>
-                <SelectItem value="branches">Sort by Branch Count</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="p-2"
+          >
+            <X className="w-5 h-5" />
+          </Button>
         </div>
+      )}
+      
+      <div className="p-2 border-b flex-shrink-0">
+        {!isMobile && (
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-lg flex items-center gap-2">
+                <GitBranch className="w-5 h-5" />
+                Repositories
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {repositories.length} repositories found
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {totalBranches} branches found
+              </p>
+            </div>
+            <div>
+              <Select value={sortBy} onValueChange={(value: 'name' | 'branches') => setSortBy(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Sort by Name (A-Z)</SelectItem>
+                  <SelectItem value="branches">Sort by Branch Count</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+        {isMobile && (
+          <div className="flex items-center justify-between mb-2">
+            <Button variant="outline" size="sm" onClick={() => {navigate('/'); if (onClose) onClose();}}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              All Repositories
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => {navigate('/branches'); if (onClose) onClose();}}>
+              <GitBranch className="w-4 h-4 mr-2" />
+              All Branches
+            </Button>
+          </div>
+        )}
         <Input
           type="text"
           placeholder="Search repositories..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="mt-3 w-full"
+          className={`w-full bg-background ${!isMobile ? 'mt-3' : ''}`}
         />
       </div>
       
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-2 space-y-2">
+          <div className={`${isMobile ? 'p-2' : 'p-4'} space-y-2`}>
             {filteredRepos.map((repo) => (
               <Card
                 key={repo.uuid}
@@ -93,7 +135,7 @@ export function RepositorySidebar({
                 }`}
                 onClick={() => handleRepoClick(repo.name)}
               >
-                <div className="p-3">
+                <div className={`${isMobile ? 'p-2' : 'p-3'}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -102,9 +144,9 @@ export function RepositorySidebar({
                         ) : (
                           <Unlock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                         )}
-                        <h3 className="font-medium text-sm truncate">{repo.name}</h3>
+                        <h3 className={`font-medium ${isMobile ? 'text-xs' : 'text-sm'} truncate`}>{repo.name}</h3>
                       </div>
-                      {repo.description && (
+                      {repo.description && !isMobile && (
                         <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                           {repo.description}
                         </p>

@@ -1,13 +1,17 @@
-import { GitBranch, RefreshCw } from "lucide-react";
-import { ThemeSwitch, useTheme } from "../common";
-import { Button } from "../ui/button";
+import { Button } from '@/components/ui/button';
+import { Menu, RefreshCw } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ThemeSwitch, useTheme } from '../common';
 
 interface NavBarProps {
-  loading: boolean;
-  refresh: () => void;
+  onToggleSidebar: () => void;
+  title?: string;
+  loading?: boolean;
+  refresh?: () => void;
 }
 
-export default function NavBar({ loading, refresh }: NavBarProps) {
+export function NavBar({ onToggleSidebar, title = "Bitbucket Branch Discovery", loading, refresh }: NavBarProps) {
+  const isMobile = useIsMobile();
   const { theme } = useTheme();
 
   // Reusable GitHub button component
@@ -37,26 +41,28 @@ export default function NavBar({ loading, refresh }: NavBarProps) {
   );
 
   return (
-    <div className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/60 flex-shrink-0 z-40 shadow-sm">
-      <div className="flex items-center justify-between p-4">
-        {/* Title (left) */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-            <GitBranch className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold flex items-center whitespace-nowrap">
-              Bitbucket Branch Discovery
-            </h1>
-            <div className="flex items-center">
-              <p className=""></p>
-              <GitHubButton />
-            </div>
-          </div>
+    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 gap-4">
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleSidebar}
+            className="h-8 w-8 p-0"
+          >
+            <Menu className="h-4 w-4" />
+            <span className="sr-only">Toggle sidebar</span>
+          </Button>
+        )}
+
+        <div className={`flex ${isMobile ? 'flex-1 flex-col' : 'gap-4'}`}>
+          <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold tracking-tight`}>
+            {title}
+          </h1>
+          <GitHubButton />
         </div>
 
-        {/* Links (center) */}
-        <div className="flex-1 flex justify-center">
+        <div className="hidden lg:flex flex-1 justify-center">
           <div className="flex items-center gap-4">
             <a href="/" className="text-sm text-blue-600 dark:text-blue-400">
               View Repositories
@@ -69,9 +75,8 @@ export default function NavBar({ loading, refresh }: NavBarProps) {
             </a>
           </div>
         </div>
-
-        {/* Helper buttons (right) */}
-        <div className="flex items-center gap-2">
+        
+        <div className="hidden lg:flex items-center gap-2">
           <ThemeSwitch />
           <Button
             variant="outline"
@@ -84,7 +89,22 @@ export default function NavBar({ loading, refresh }: NavBarProps) {
             Refresh
           </Button>
         </div>
+
+        <div className="flex lg:hidden items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refresh}
+            disabled={loading}
+            className="shadow-sm"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
+
+
       </div>
-    </div>
+    </header>
   );
 }
